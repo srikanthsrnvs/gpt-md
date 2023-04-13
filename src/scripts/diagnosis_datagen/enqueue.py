@@ -14,16 +14,21 @@ def remove_all_jobs(queue):
     while not queue.is_empty():
         queue.dequeue()
 
+def create_prompt(code, short_description, long_description, nf_excl):
+    nf_excl_text = "This condition has been marked as NF EXCL: {}. ".format(nf_excl) if nf_excl else ""
+    prompt = "Can you provide more information about the condition with code '{}'? Its short description is '{}', and the long description is '{}'. {}Please elaborate on diagnosis, treatment options, and any precautions to take.".format(code, short_description, long_description, nf_excl_text)
+    return prompt
+
 def enqueue_prompts(prompts):
     redis_conn = Redis.from_url(os.getenv("REDIS_URL"))
     queue = Queue(connection=redis_conn)
     for prompt in prompts:
         queue.enqueue("worker.process_prompt", prompt)
 
-def extract_short_descriptions_from_csv(file_path, column_name, num_rows=None):
+def extract_data_from_csv(file_path, num_rows=None):
     df = pd.read_csv(file_path, nrows=num_rows)
-    short_descriptions = df[column_name].tolist()
-    return short_descriptions
+    data = df.to_dict('records')
+    return data
 
 if __name__ == "__main__":
     redis_conn = Redis.from_url(os.getenv("REDIS_URL"))
@@ -37,9 +42,10 @@ if __name__ == "__main__":
         file_path = '../../data/conditions.csv'
         column_name = 'SHORT DESCRIPTION'  # Adjust if your column has a different name
 
-        short_descriptions = extract_short_descriptions_from_csv(file_path, column_name, args.num_rows)
-        prompts = [f"What is {short_description}?" for short_description in short_descriptions]
+        data = extract_data_from_csv(file_path, args.num_rows)
+        prompts = [create_prompt(row['CODE'], row['SHORT DESCRIPTION'], row['LONG DESCRIPTION'], row['NF EXCL']) for row in data]
 
+        print("Example prompt: {}".format(prompts[0]))
 
         # Set up a signal handler to clean up the Redis queue if the script is terminated
         def handle_signal(signum, frame):

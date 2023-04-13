@@ -1,6 +1,8 @@
 import os
 import openai
 import sys
+import re
+
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "."))
 
 from redis import Redis
@@ -26,11 +28,21 @@ def generate_completion(prompt):
     # Extract the assistant's response
     return response.choices[0].message.content
 
+def extract_code_from_prompt(prompt):
+    match = re.search(r"code: '(.+?)'", prompt)
+    if match:
+        return match.group(1)
+    return None
+
 
 def process_prompt(prompt):
     completion = generate_completion(prompt)
-    condition_name = prompt.replace("What is ", "").replace("?", "")
-    save_completion(condition_name, completion)
+    code = extract_code_from_prompt(prompt)
+    if code:
+        output_name = code
+        save_completion(output_name, completion)
+    else:
+        save_completion(prompt, completion)
 
 if __name__ == "__main__":
     redis_conn = Redis.from_url(os.getenv("REDIS_URL"))
