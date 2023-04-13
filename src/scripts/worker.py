@@ -9,16 +9,19 @@ load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+
 def generate_completion(prompt):
-    response = openai.Completion.create(
-        engine="text-davinci-002",
-        prompt=prompt,
-        max_tokens=100,
-        n=1,
-        stop=None,
-        temperature=0.7
+    response = openai.ChatCompletion.create(
+        model="gpt-4",  # Replace with the GPT-4 model name
+        messages=[
+            {"role": "system", "content": "You are GPT-MD. An AI trained to pass medical examinations. You are given a question and must output a concise, and accurate answer. If you do not know the answer, you must say so. Do not lie, or hallucinate."},
+            {"role": "user", "content": prompt},
+        ],
     )
-    return response.choices[0].text.strip()
+
+    # Extract the assistant's response
+    return response.choices[0].message.content
+
 
 def process_prompt(prompt):
     completion = generate_completion(prompt)

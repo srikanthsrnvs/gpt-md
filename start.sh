@@ -1,7 +1,17 @@
 #!/bin/bash
 
+# Define a function to remove all jobs from the Redis queue
+remove_jobs() {
+    echo "Removing all jobs from the Redis queue"
+    redis-cli del rq:queue:default
+}
+
+# Set up a trap to handle termination signals (SIGINT, SIGTERM)
+trap remove_jobs INT TERM
+
 # Run enqueue_jobs.py
-python enqueue_jobs.py
+read -p "Enter the number of rows to process (or press Enter for all rows): " num_rows
+python enqueue_jobs.py --num_rows "${num_rows:-}"
 
 # Get the number of enqueued jobs
 num_jobs=$(redis-cli llen rq:queue:default)
@@ -21,4 +31,8 @@ if [[ $continue_answer =~ ^[Yy]$ ]]; then
         ./start_workers.sh $num_workers
 else
     echo "Exiting without starting workers"
+    remove_jobs
 fi
+
+# Remove the trap when the script finishes
+trap - INT TERM
