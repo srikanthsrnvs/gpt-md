@@ -11,7 +11,7 @@ trap remove_jobs INT TERM
 
 # Run enqueue_jobs.py
 read -p "Enter the number of rows to process (or press Enter for all rows): " num_rows
-python enqueue_jobs.py --num_rows "${num_rows:-}"
+python3 enqueue.py --num_rows "${num_rows:-}"
 
 # Get the number of enqueued jobs
 num_jobs=$(redis-cli llen rq:queue:default)
@@ -27,8 +27,7 @@ if [[ $continue_answer =~ ^[Yy]$ ]]; then
     read -p "Enter the number of workers: " num_workers
 
     # Start the workers with a progress bar using tqdm
-    python -m tqdm --unit "job" --total $num_jobs --interval 1 -- \
-        ./start_workers.sh $num_workers
+    ./generate.sh $num_workers
 else
     echo "Exiting without starting workers"
     remove_jobs

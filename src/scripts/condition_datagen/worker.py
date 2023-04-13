@@ -17,6 +17,7 @@ def generate_completion(prompt):
             {"role": "system", "content": "You are GPT-MD. An AI trained to pass medical examinations. You are given a question and must output a concise, and accurate answer. If you do not know the answer, you must say so. Do not lie, or hallucinate."},
             {"role": "user", "content": prompt},
         ],
+        max_tokens=1024,
     )
 
     # Extract the assistant's response
@@ -25,7 +26,8 @@ def generate_completion(prompt):
 
 def process_prompt(prompt):
     completion = generate_completion(prompt)
-    save_completion(prompt, completion)
+    condition_name = prompt.replace("What is ", "").replace("?", "")
+    save_completion(condition_name, completion)
 
 if __name__ == "__main__":
     redis_conn = Redis.from_url(os.getenv("REDIS_URL"))

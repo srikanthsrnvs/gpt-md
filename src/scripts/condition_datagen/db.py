@@ -6,10 +6,10 @@ load_dotenv()
 
 def connect():
     conn = psycopg2.connect(
-        dbname="conditions",
+        dbname="postgres",
         user=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
-        host=os.getenv("POSTGRES_URL"),
+        host=os.getenv("POSTGRES_HOST"),
         port=5432
     )
     return conn
@@ -17,7 +17,7 @@ def connect():
 def save_completion(prompt, completion):
     conn = connect()
     cur = conn.cursor()
-    cur.execute("INSERT INTO completions (prompt, completion) VALUES (%s, %s)", (prompt, completion))
+    cur.execute("INSERT INTO conditions (name, information) VALUES (%s, %s)", (prompt, completion))
     conn.commit()
     cur.close()
     conn.close()
