@@ -23,4 +23,5 @@ fi
 echo "Installing Python requirements..."
 pip install -r requirements.txt
 
+source .env
 echo "Setup complete"
