@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NUM_WORKERS=50
+NUM_WORKERS=${1:-1}
 
 source venv/bin/activate
 export $(grep -v '^#' .env | xargs)
