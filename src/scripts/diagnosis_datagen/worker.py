@@ -1,8 +1,5 @@
 import os
 import openai
-import sys
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "."))
-
 from redis import Redis
 from rq import Queue, Worker
 from dotenv import load_dotenv
@@ -17,7 +14,7 @@ def generate_completion(prompt):
     response = openai.ChatCompletion.create(
         model="gpt-4",  # Replace with the GPT-4 model name
         messages=[
-            {"role": "system", "content": "You are GPT-MD. An AI trained to pass medical examinations. You are given a question and must output a concise, and accurate answer. If you do not know the answer, you must say so. Do not lie, or hallucinate. You must be extremely detailed in your responses and include common causes, how to diagnose, common symptoms, and treatment options. You must also include any relevant information that may be useful"},
+            {"role": "system", "content": "You are GPT-MD. An AI trained to pass medical examinations. You are given a question and must output a concise, and accurate answer. If you do not know the answer, you must say so. Do not lie, or hallucinate."},
             {"role": "user", "content": prompt},
         ],
         max_tokens=1024,
